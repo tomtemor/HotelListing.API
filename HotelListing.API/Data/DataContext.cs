@@ -13,6 +13,9 @@ namespace HotelListing.API.Data
         public DbSet<Country> Countries { get; set; }
 
 
+        /// <summary>
+        /// Seeding data in DbContext using OnModelCreating
+        /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

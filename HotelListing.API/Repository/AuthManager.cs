@@ -57,17 +57,17 @@ namespace HotelListing.API.Repository
 
         private async Task<string> GenerateToken()
         {
-
+            // testing around to fund solution and problem was erroneous appsettings....
             //var cooonn = _configuration.GetValue<string>("JwtSettings:Key");
             //var WhatIs = _configuration.GetValue("JwtSettings:Key", "text/plain");
-            // var whatIs = _configuration.GetSection("JwtSettings:Key");
+             var whatIs = _configuration.GetSection("JwtSettings:Key");
           //  var daaas = whatIs.Value;
             //  GetChildren().FirstOrDefault(config => config.Key == "Key").Value, "text/plain";
             //var issuers = _configuration["JwtSettings:Issuer"];
             // return Content(_configuration.GetValue<string>("RoundTheCodeSync:Title"), "text/plain");
-            // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
             // **>CK Getting "String reference not set to an object of a string when using this, what?
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"));
+         //   var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"));
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 

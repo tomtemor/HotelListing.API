@@ -60,7 +60,7 @@ namespace HotelListing.API.Repository
 
             //var cooonn = _configuration.GetValue<string>("JwtSettings:Key");
             //var WhatIs = _configuration.GetValue("JwtSettings:Key", "text/plain");
-            //  var whatIs = _configuration.GetSection("JwtSettings:Key");
+            // var whatIs = _configuration.GetSection("JwtSettings:Key");
           //  var daaas = whatIs.Value;
             //  GetChildren().FirstOrDefault(config => config.Key == "Key").Value, "text/plain";
             //var issuers = _configuration["JwtSettings:Issuer"];

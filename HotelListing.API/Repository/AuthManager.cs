@@ -4,6 +4,7 @@ using HotelListing.API.Data;
 using HotelListing.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,6 +18,9 @@ namespace HotelListing.API.Repository
         private readonly IConfiguration _configuration;
         private ApiUser _user;
 
+        private const string _loginProvider = "HotelListingApi";
+        private const string _refreshToken = "RefreshToken";
+
         public AuthManager(IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
         {
             _mapper = mapper;
@@ -24,6 +28,16 @@ namespace HotelListing.API.Repository
             _configuration = configuration;
         }
 
+        public async Task<string> CreateRefreshToken()
+        {
+            await _userManager.RemoveAuthenticationTokenAsync(_user, _loginProvider,
+                "RefreshToken");
+            var newRefreshToken = await _userManager.GenerateUserTokenAsync(_user, _loginProvider, _refreshToken);
+            var result = await _userManager.SetAuthenticationTokenAsync(_user, _loginProvider, _refreshToken, newRefreshToken);
+            return newRefreshToken;
+
+
+        }
         public async Task<AuthResponseDto> Login(LoginDto loginDto)
         {
                 _user = await _userManager.FindByEmailAsync(loginDto.Email);
@@ -37,7 +51,8 @@ namespace HotelListing.API.Repository
             return new AuthResponseDto
             {
                 Token = token,
-                UserId = _user.Id
+                UserId = _user.Id,
+                RefreshToken = await CreateRefreshToken()
             };
         }
 
@@ -56,9 +71,17 @@ namespace HotelListing.API.Repository
 
         private async Task<string> GenerateToken()
         {
-           // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+            // testing around to fund solution and problem was erroneous appsettings....
+            //var cooonn = _configuration.GetValue<string>("JwtSettings:Key");
+            //var WhatIs = _configuration.GetValue("JwtSettings:Key", "text/plain");
+             var whatIs = _configuration.GetSection("JwtSettings:Key");
+          //  var daaas = whatIs.Value;
+            //  GetChildren().FirstOrDefault(config => config.Key == "Key").Value, "text/plain";
+            //var issuers = _configuration["JwtSettings:Issuer"];
+            // return Content(_configuration.GetValue<string>("RoundTheCodeSync:Title"), "text/plain");
+             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
             // **>CK Getting "String reference not set to an object of a string when using this, what?
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"));
+         //   var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"));
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -87,6 +110,35 @@ namespace HotelListing.API.Repository
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<AuthResponseDto> VerifyRefreshToken(AuthResponseDto request)
+        {
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var tokenContent = jwtSecurityTokenHandler.ReadJwtToken(request.Token);
+            var username = tokenContent.Claims.ToList().FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Email)?.Value;
+            _user = await _userManager.FindByNameAsync(username);
+
+            if (_user == null || _user.Id != request.UserId)
+            {
+                return null;
+            }
+
+            var isValidRefreshToken = await _userManager.VerifyUserTokenAsync(_user, _loginProvider, _refreshToken, request.RefreshToken);
+
+            if (isValidRefreshToken)
+            {
+                var token = await GenerateToken();
+                return new AuthResponseDto
+                {
+                    Token = token,
+                    UserId = _user.Id,
+                    RefreshToken = await CreateRefreshToken()
+                };
+            }
+
+            await _userManager.UpdateSecurityStampAsync(_user);
+            return null;
         }
     }
 }

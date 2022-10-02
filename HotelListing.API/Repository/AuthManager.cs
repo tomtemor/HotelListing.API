@@ -4,6 +4,7 @@ using HotelListing.API.Data;
 using HotelListing.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -56,7 +57,15 @@ namespace HotelListing.API.Repository
 
         private async Task<string> GenerateToken()
         {
-           // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+
+            //var cooonn = _configuration.GetValue<string>("JwtSettings:Key");
+            //var WhatIs = _configuration.GetValue("JwtSettings:Key", "text/plain");
+            //  var whatIs = _configuration.GetSection("JwtSettings:Key");
+          //  var daaas = whatIs.Value;
+            //  GetChildren().FirstOrDefault(config => config.Key == "Key").Value, "text/plain";
+            //var issuers = _configuration["JwtSettings:Issuer"];
+            // return Content(_configuration.GetValue<string>("RoundTheCodeSync:Title"), "text/plain");
+            // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
             // **>CK Getting "String reference not set to an object of a string when using this, what?
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"));
 

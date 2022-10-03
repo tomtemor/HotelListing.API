@@ -1,4 +1,4 @@
-﻿using HotelListing.API.Contracts;
+﻿    using HotelListing.API.Contracts;
 using HotelListing.API.Models.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,27 +10,33 @@ namespace HotelListing.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAuthManager _authManager;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAuthManager authManager)
+        public AccountController(IAuthManager authManager, ILogger<AccountController> logger)
         {
             _authManager = authManager;
+            _logger = logger;
         }
 
         //POST: api/account/register
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult> Register([FromBody]ApiUserDto apiUserDto)
+        public async Task<ActionResult> Register([FromBody] ApiUserDto apiUserDto)
         {
-            var errors = await _authManager.Register(apiUserDto);
-            if (errors.Any())
-            {
-                foreach (var error in errors)
+            _logger.LogInformation($"Registration attempt for {apiUserDto.Email}");
+           
+                var errors = await _authManager.Register(apiUserDto);
+                if (errors.Any())
                 {
-                    ModelState.AddModelError(error.Code, error.Description);
+                    foreach (var error in errors)
+                    {
+                        ModelState.AddModelError(error.Code, error.Description);
+                    }
+                    return BadRequest(ModelState);
                 }
-                return BadRequest(ModelState);
-            }
-            return Ok();
+                return Ok();
+            
+          
         }
 
         //POST: api/account/login
@@ -38,12 +44,17 @@ namespace HotelListing.API.Controllers
         [Route("login")]
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
+            _logger.LogInformation($"Login attempt for {loginDto.Email}");
+
+
             var authResponse = await _authManager.Login(loginDto);
 
             if (authResponse == null)
                 return Unauthorized();
 
+            _logger.LogInformation($"Login successful for {loginDto.Email}");
             return Ok(authResponse);
+
         }
 
 

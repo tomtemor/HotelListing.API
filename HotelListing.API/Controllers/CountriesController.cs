@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Country;
@@ -11,9 +6,8 @@ using AutoMapper;
 using HotelListing.API.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using HotelListing.API.Exceptions;
+using HotelListing.API.Models;
 
-// Koda med Christer
-// Coding with Christer
 namespace HotelListing.API.Controllers
 {
     [Route("api/[controller]")]
@@ -32,12 +26,20 @@ namespace HotelListing.API.Controllers
         }
 
         // GET: api/Countries
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
             var countries = await _countriesRepository.GetAllAsync();
-            var mappedCountries = _mapper.Map<List<GetCountryDto>>(countries);
-            return Ok(mappedCountries);
+            //var mappedCountries = _mapper.Map<List<GetCountryDto>>(countries);
+            return Ok(countries);
+        }
+        
+        // GET: api/Countries?StartIndex=0&pagesize=25&PageNumber=1
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetPagedCountries([FromQuery] QueryParameters queryParameters)
+        {
+            var PagedCountriesResult = await _countriesRepository.GetAllAsync<GetCountryDto>(queryParameters);
+            return Ok(PagedCountriesResult);
         }
 
         // GET: api/Countries/5

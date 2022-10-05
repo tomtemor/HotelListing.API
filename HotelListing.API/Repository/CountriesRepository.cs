@@ -1,4 +1,5 @@
-﻿using HotelListing.API.Contracts;
+﻿using AutoMapper;
+using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,7 @@ namespace HotelListing.API.Repository
     {
         private readonly DataContext _context;
 
-        public CountriesRepository(DataContext context) : base(context)
+        public CountriesRepository(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
         }
